@@ -48,11 +48,11 @@ export default function ImagePickerExample() {
   return (
     <>
       <View style={{flex: 1, marginTop: 50, marginHorizontal: 10, alignItems: 'center', justifyContent: 'center'}}>
-        <Button title={image ? "Change pic #1 (example: ID)" : "Pick pic #1 (example: ID)"} onPress={pickImage} />
+        <Button title={image ? "Change pic #1 (example: ID)" : "Choose pic #1 (example: ID)"} onPress={pickImage} />
         {image && <Image source={{uri: image.localUri}} style={{width: '100%', height: '75%'}} />}
       </View>
       <View style={{flex: 1, marginBottom: 25, marginHorizontal: 10, alignItems: 'center', justifyContent: 'center'}}>
-        <Button title={image ? "Change pic #2 (example: Vaccine Card)" : "Pick pic #2 (example: Vaccine Card)"} onPress={pickImage2} />
+        <Button title={image ? "Change pic #2 (example: Vaccine Card)" : "Choose pic #2 (example: Vaccine Card)"} onPress={pickImage2} />
         {image2 && <Image source={{uri: image2.localUri}} style={{width: '100%', height: '75%'}} />}
       </View>
     </>
