@@ -17,7 +17,11 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.ryanmeinzer.1click2pics",
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "Give 1click2pics permission to access your photos so that you may choose which photos to display on your screen."
+      }
     },
     "android": {
       "adaptiveIcon": {
