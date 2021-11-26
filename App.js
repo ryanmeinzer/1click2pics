@@ -1,6 +1,8 @@
 import React, {useState, useEffect} from 'react'
 import {Button, Image, View, Platform} from 'react-native'
 import * as ImagePicker from 'expo-image-picker'
+import * as FileSystem from 'expo-file-system';
+import * as MediaLibrary from 'expo-media-library';
 
 export default function ImagePickerExample() {
   const [image, setImage] = useState(null)
@@ -26,8 +28,28 @@ export default function ImagePickerExample() {
     })
 
     if (!result.cancelled) {
-      setImage({localUri: result.uri})
-      // setImage(result.uri)
+
+      // the below two console.logs return the same information
+      // console.log('result:', result)
+      // FileSystem.getInfoAsync(result.uri)
+      //   .then(info => {console.log('FileSystem.getInfoAsync:', info)})
+      
+      // create app asset from local file
+      const asset = await MediaLibrary.createAssetAsync(result.uri)
+
+      // get asset's MediaLibrary uri and the asset's localUri
+      // MediaLibrary.getAssetInfoAsync(asset)
+      //   .then(info => {console.log('asset.uri:', asset.uri), console.log('asset.localUri:', info.localUri)})
+
+      // the below doesn't work
+      // setImage({localUri: asset.localUri})
+
+      // setImage to the asset's uri
+      setImage({localUri: asset.uri})
+
+      // legacy v1.0.0 - setImage to the image's localUri, stored in OS' cache (soon automatically deleted)
+      // setImage({localUri: result.uri})
+
     }
   }
 
@@ -40,10 +62,14 @@ export default function ImagePickerExample() {
     })
 
     if (!result.cancelled) {
-      setImage2({localUri: result.uri})
-      // setImage2(result.uri)
+      const asset2 = await MediaLibrary.createAssetAsync(result.uri)
+      setImage2({localUri: asset2.uri})
     }
   }
+
+  // get last asset (AppExpo places it first in the array, not the last)
+  // MediaLibrary.getAssetsAsync()
+  //   .then(info => {console.log('last asset:', info.assets[0].uri)})
 
   return (
     <>
