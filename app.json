@@ -2,7 +2,7 @@
   "expo": {
     "name": "1click2pics",
     "slug": "1click2pics",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "splash": {
@@ -20,7 +20,7 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.ryanmeinzer.1click2pics",
       "infoPlist": {
-        "NSPhotoLibraryUsageDescription": "Give 1click2pics permission to access your photos so that you may choose which photos to display on your screen."
+        "NSPhotoLibraryUsageDescription": "Give 1click2pics permission to access your photos so that you may choose which photos to display on your screen. Your original photos will never be deleted and will only be copied into a new 1click2pics album on your phone for your privacy and safety."
       }
     },
     "android": {

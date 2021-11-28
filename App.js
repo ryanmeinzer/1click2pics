@@ -5,10 +5,6 @@ import * as MediaLibrary from 'expo-media-library';
 
 export default function ImagePickerExample() {
 
-  // ToDo - remove states, just use MediaLibrary to only ever have two images in array/library and use the first as the first image and the second as the second, conditionally checking if they exist instead of state to prompt the user to select (or replace) the respective image
-
-  const [image2, setImage2] = useState(null)
-
   const [albumExists, setAlbumExists] = useState(false)
   const [asset1Exists, setAsset1Exists] = useState(false)
   const [asset2Exists, setAsset2Exists] = useState(false)
@@ -16,30 +12,34 @@ export default function ImagePickerExample() {
   const [asset2, setAsset2] = useState(null)
   const [albumId, setAlbumId] = useState(null)
 
-  useEffect(() => {
-    console.log(
-      'albumExists:', albumExists, '\n',
-      'asset1Exists:', asset1Exists, '\n',
-      'asset2Exists:', asset2Exists, '\n',
-      'asset1:', asset1, '\n',
-      'asset2:', asset2,
-    )
-  })
+  // below used for testing
+  // useEffect(() => {
+  //   console.log(
+  //     'albumExists:', albumExists, '\n',
+  //     'asset1Exists:', asset1Exists, '\n',
+  //     'asset2Exists:', asset2Exists, '\n',
+  //     'asset1:', asset1, '\n',
+  //     'asset2:', asset2,
+  //   )
+  // })
 
   useEffect(() => {
     // check to see if the album exists
     MediaLibrary.getAlbumAsync('1click2pics')
       .then(result => result != null && setAlbumExists(true))
     
-    albumExists &&
-    // if albumExists, check to see which assets exist (if only one asset, it will be forced to be the first)
-    MediaLibrary.getAlbumAsync('1click2pics')
-      .then(result => {
-        console.log('result.assetCount:', result.assetCount)
-        result.assetCount === 2 && (setAsset1Exists(true), setAsset2Exists(true))
-        result.assetCount === 1 && setAsset1Exists(true)
-      })
-  })
+    albumExists
+      ?
+      // if albumExists, check to see which assets exist (if only one asset, it will be forced to be the first)
+      MediaLibrary.getAlbumAsync('1click2pics')
+        .then(result => {
+          result.assetCount >= 2 && (setAsset1Exists(true), setAsset2Exists(true))
+          result.assetCount === 1 && setAsset1Exists(true)
+        })
+      :
+      setAsset1Exists(false)
+      setAsset2Exists(false)
+  }, [albumExists])
 
   useEffect(() => {
     // if albumExists, get album id, setAlbumID and set existing assets (if only one asset, it will be forced to be the first)
@@ -50,15 +50,11 @@ export default function ImagePickerExample() {
         setAlbumId(album.id)
         MediaLibrary.getAssetsAsync({album: albumId})
           .then(info => {
-            console.log('info.assets.length:', info.assets.length)
-            console.log('info.assets.length === 1 boolean:', info.assets.length === 1)
-            console.log('info.assets.length === 2 boolean:', info.assets.length === 2)
-            info.assets.length === 2 && (setAsset1(info.assets[1]), setAsset2(info.assets[0]))
+            info.assets.length >= 2 && (setAsset1(info.assets[1]), setAsset2(info.assets[0]))
             info.assets.length === 1 && setAsset1(info.assets[0])
           })
       })
   }, [albumExists])
-
 
   useEffect(() => {
     (async () => {
@@ -71,7 +67,7 @@ export default function ImagePickerExample() {
     })()
   }, [])
 
-  const pickImage = async () => {
+  const pickAsset1 = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
       allowsEditing: true,
@@ -81,29 +77,47 @@ export default function ImagePickerExample() {
 
     if (!result.cancelled) {
 
-      !albumExists ?
+      !albumExists
+        ?
         // create asset
         await MediaLibrary.createAssetAsync(result.uri)
           .then(asset => {
             // create album and add asset to it
             MediaLibrary.createAlbumAsync('1click2pics', asset.id)
               .then(setAsset1(asset))
-            // .then(setImage({localUri: asset.uri}, console.log('asset1:', asset1)))
+              .then(setAsset1Exists(true))
+            alert("Great! After adding pic #2 and if you'd ever like to change this pic #1, you'll be prompted to let 1click2pics delete the changed/unused photos from its album to prompt you to re-add pic #1 and pic #2.")
           })
-        :
-        // create asset
-        await MediaLibrary.createAssetAsync(result.uri)
-          .then(asset => {
-            // delete current asset1
-            MediaLibrary.deleteAssetsAsync(asset1.id)
-            // add asset to album
-            MediaLibrary.addAssetsToAlbumAsync(asset, `${albumId}`)
-              .then(setAsset1(asset))
-          })
+        : 
+        // delete current asset1
+        await MediaLibrary.deleteAssetsAsync(asset1.id)
+          .then(
+            // create asset
+            await MediaLibrary.createAssetAsync(result.uri)
+              .then(asset => {
+                // add asset to album
+                MediaLibrary.addAssetsToAlbumAsync(asset, `${albumId}`)
+                  setAsset1(asset),
+                  setAsset1Exists(true)
+              })
+              .catch(err => console.log(err)),
+            // delete current asset2 if it exists and have the user start over
+            asset2 !== null &&
+            await MediaLibrary.deleteAssetsAsync(asset2.id)
+              .then(
+                setAsset2(null),
+                setAsset2Exists(false),
+                console.log('assettty:', asset2 === null),
+                alert("Nice refresh! Now let's re-add pic #2 (assuming you've allowed the app to delete the changed/unused photos from its album.")
+              )
+              .catch(err => console.log(err))
+          )
+          .catch(err => console.log(err))
     }
   }
 
-  const pickImage2 = async () => {
+  const pickAsset2 = async () => {
+
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
       allowsEditing: true,
@@ -113,43 +127,49 @@ export default function ImagePickerExample() {
 
     if (!result.cancelled) {
 
-      // create album if it doesn't exist 
-      !albumExists && MediaLibrary.createAlbumAsync('1click2pics')
-
-      // get album id
-      const albumId = await MediaLibrary.getAlbumAsync('1click2pics')
-        .then(album => album.id)
-
-      // create app asset from local file
-      const asset2 = await MediaLibrary.createAssetAsync(result.uri)
-
-      // add asset to album
-      MediaLibrary.addAssetsToAlbumAsync(asset2, `${albumId}`)
-
-      setImage2({localUri: asset2.uri})
+      asset2 === null
+        ?
+        // create asset
+        await MediaLibrary.createAssetAsync(result.uri)
+          .then(asset => {
+            // add asset to album
+            MediaLibrary.addAssetsToAlbumAsync(asset, `${albumId}`)
+              .then(setAsset2(asset))
+              .then(setAsset2Exists(true))
+            alert("Great! Now that you've added pic #2 and if you'd ever like to change pic #1, you'll be prompted to let 1click2pics delete the changed/unused photos from its album to prompt you to re-add pic #1 and pic #2.")
+          })
+          .catch(err => console.log(err))
+        :
+        // delete current asset2
+        await MediaLibrary.deleteAssetsAsync(asset2.id)
+          .then(
+            // create asset
+            await MediaLibrary.createAssetAsync(result.uri)
+              .then(asset => {
+                // add asset to album
+                MediaLibrary.addAssetsToAlbumAsync(asset, `${albumId}`)
+                setAsset2(asset),
+                  setAsset2Exists(true)
+              })
+              .catch(err => console.log(err))
+          )
+          .catch(err => console.log(err))
     }
   }
 
-  // get last asset (AppExpo places it first in the array, not the last)
-  // MediaLibrary.getAssetsAsync()
-  //   .then(info => {console.log('last asset:', info.assets[0].uri)})
-  
-  // get all assets
-  // MediaLibrary.getAssetsAsync()
-  //   .then(info => {console.log('all assets count:', info.assets.length)})
+  const pickAsset2Alert = () => {
+    alert('Choose pic #1 first, please.')
+  }
 
   return (
     <>
       <View style={{flex: 1, marginTop: 50, marginHorizontal: 10, alignItems: 'center', justifyContent: 'center'}}>
-        <Button title={asset1 ? "Change pic #1 (example: ID)" : "Choose pic #1 (example: ID)"} onPress={pickImage} />
-        {/* // either of the below local or album uri works and holds the image in memory */}
-        {/* {<Image source={{uri: `file:///Users/ryanmeinzer/Library/Developer/CoreSimulator/Devices/10D62BD0-9D7D-4ADD-9D0D-266E0788EF82/data/Media/DCIM/100APPLE/IMG_0094.JPG`}} style={{width: '100%', height: '75%'}} />} */}
+        <Button title={asset1 ? "Change pic #1 (example: ID)" : "Choose pic #1 (example: ID)"} onPress={pickAsset1} />
         {asset1 && <Image source={{uri: asset1.uri}} style={{width: '100%', height: '75%'}} />}
-        {/* {image && <Image source={{uri: image.localUri}} style={{width: '100%', height: '75%'}} />} */}
       </View>
       <View style={{flex: 1, marginBottom: 25, marginHorizontal: 10, alignItems: 'center', justifyContent: 'center'}}>
-        <Button title={image2 ? "Change pic #2 (example: Vaccine Card)" : "Choose pic #2 (example: Vaccine Card)"} onPress={pickImage2} />
-        {image2 && <Image source={{uri: image2.localUri}} style={{width: '100%', height: '75%'}} />}
+        <Button title={asset2 ? "Change pic #2 (example: Vaccine Card)" : "Choose pic #2 (example: Vaccine Card)"} onPress={asset1Exists ?pickAsset2 : pickAsset2Alert} />
+        {asset2 && <Image source={{uri: asset2.uri}} style={{width: '100%', height: '75%'}} />}
       </View>
     </>
   )
