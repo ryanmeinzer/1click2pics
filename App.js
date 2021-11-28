@@ -84,8 +84,8 @@ export default function ImagePickerExample() {
           .then(asset => {
             // create album and add asset to it
             MediaLibrary.createAlbumAsync('1click2pics', asset.id)
-              .then(setAsset1(asset))
-              .then(setAsset1Exists(true))
+              setAsset1(asset)
+              setAsset1Exists(true)
             alert("Great! After adding pic #2 and if you'd ever like to change this pic #1, you'll be prompted to let 1click2pics delete the changed/unused photos from its album to prompt you to re-add pic #1 and pic #2.")
           })
         : 
@@ -132,13 +132,17 @@ export default function ImagePickerExample() {
         // create asset
         await MediaLibrary.createAssetAsync(result.uri)
           .then(asset => {
-            // add asset to album
-            MediaLibrary.addAssetsToAlbumAsync(asset, `${albumId}`)
-              .then(setAsset2(asset))
-              .then(setAsset2Exists(true))
-            alert("Great! Now that you've added pic #2 and if you'd ever like to change pic #1, you'll be prompted to let 1click2pics delete the changed/unused photos from its album to prompt you to re-add pic #1 and pic #2.")
+            MediaLibrary.getAlbumAsync('1click2pics')
+              .then(album => {
+                const albumId = album.id
+                // add asset to album
+                MediaLibrary.addAssetsToAlbumAsync(asset, `${albumId}`)
+                setAsset2(asset),
+                  setAsset2Exists(true),
+                  alert("Great! Now that you've added pic #2 and if you'd ever like to change pic #1, you'll be prompted to let 1click2pics delete the changed/unused photos from its album to prompt you to re-add pic #1 and pic #2.")
+              })
           })
-          .catch(err => console.log(err))
+                .catch(err => console.log(err))
         :
         // delete current asset2
         await MediaLibrary.deleteAssetsAsync(asset2.id)
@@ -148,8 +152,9 @@ export default function ImagePickerExample() {
               .then(asset => {
                 // add asset to album
                 MediaLibrary.addAssetsToAlbumAsync(asset, `${albumId}`)
-                setAsset2(asset),
+                  setAsset2(asset),
                   setAsset2Exists(true)
+                  alert("Nice refresh! If you'd ever like to change pic #1, you'll be prompted to let 1click2pics delete the changed/unused photos from its album to prompt you to re-add pic #1 and pic #2.")
               })
               .catch(err => console.log(err))
           )
