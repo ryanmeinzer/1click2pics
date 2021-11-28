@@ -42,6 +42,7 @@ export default function ImagePickerExample() {
     albumExists &&
     MediaLibrary.getAlbumAsync('1click2pics')
       .then(album => {
+        // cover edge case of promise returning null
         if (album != null) {
           const albumId = album.id
           setAlbumId(album.id)
