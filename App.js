@@ -180,12 +180,12 @@ export default function ImagePickerExample() {
   return (
     <>
       <View style={{flex: 1, marginTop: 50, marginHorizontal: 10, alignItems: 'center', justifyContent: 'center'}}>
-        <Button title={asset1 ? "Change pic #1 (example: ID)" : "Choose pic #1 (example: ID)"} onPress={pickAsset1} />
-        {asset1 && <Image source={{uri: asset1.uri}} style={{width: '100%', height: '75%'}} />}
+        <Button title={asset1 ? "Change pic #1" : "Choose pic #1"} onPress={pickAsset1} />
+        {asset1 && <Image source={{uri: asset1.uri}} style={{width: '100%', height: '75%'}} resizeMode='contain'/>}
       </View>
       <View style={{flex: 1, marginBottom: 25, marginHorizontal: 10, alignItems: 'center', justifyContent: 'center'}}>
-        <Button title={asset2 ? "Change pic #2 (example: Vaccine Card)" : "Choose pic #2 (example: Vaccine Card)"} onPress={asset1Exists ?pickAsset2 : pickAsset2Alert} />
-        {asset2 && <Image source={{uri: asset2.uri}} style={{width: '100%', height: '75%'}} />}
+        <Button title={asset2 ? "Change pic #2" : "Choose pic #2"} onPress={asset1Exists ?pickAsset2 : pickAsset2Alert} />
+        {asset2 && <Image source={{uri: asset2.uri}} style={{width: '100%', height: '75%'}} resizeMode='contain' />}
       </View>
     </>
   )
