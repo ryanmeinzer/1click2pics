@@ -4,7 +4,7 @@ I built www.1click2pics.com to make it easier for anyone to enter anywhere.
 
 ## Use
 
-Go to www.1click2pics.com It's a mobile-friendly iPhone & Android App!
+Go to www.1click2pics.com for the download links for either iPhone or Android!
 
 Frontend Code Repository - https://github.com/ryanmeinzer/1click2pics
 
